@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treaty Segmentation Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Text Segmentation: "The Scissors"</h1>
+            <p><strong>Instructions:</strong> Click on any word to drop a segment boundary <em>after</em> that word. Click it again to remove it.</p>
+        </header>
+
+        <!-- This is where our treaty text will be injected by JavaScript -->
+        <div id="text-container" class="text-box"></div>
+
+        <div class="controls">
+            <button id="export-btn">Export Cut Indices</button>
+            <button id="clear-btn" style="background-color: #ef4444;">Clear All Cuts</button>
+        </div>
+
+        <div id="output-console" class="console">
+            Awaiting cuts...
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html> 

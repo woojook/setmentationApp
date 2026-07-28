@@ -1,0 +1,75 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    padding: 40px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    margin-top: 0;
+    color: #111;
+}
+
+.text-box {
+    line-height: 2.2;
+    font-size: 18px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #fafafa;
+    margin-bottom: 20px;
+}
+
+/* The magic for clicking words */
+.word {
+    display: inline-block;
+    padding: 2px 4px;
+    cursor: pointer;
+    border-radius: 3px;
+    user-select: none; /* Prevents accidental highlighting */
+    transition: background 0.2s;
+}
+
+.word:hover {
+    background-color: #dbeafe;
+}
+
+/* The red boundary line */
+.word.cut-after {
+    border-right: 3px solid #ef4444;
+    padding-right: 6px;
+    margin-right: 4px;
+}
+
+button {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #1d4ed8;
+}
+
+.console {
+    margin-top: 20px;
+    background: #1e293b;
+    color: #38bdf8;
+    padding: 15px;
+    border-radius: 6px;
+    font-family: monospace;
+}
