@@ -73,3 +73,8 @@ button:hover {
     border-radius: 6px;
     font-family: monospace;
 }
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}

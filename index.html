@@ -13,19 +13,37 @@
             <p><strong>Instructions:</strong> Click on any word to drop a segment boundary <em>after</em> that word. Click it again to remove it.</p>
         </header>
 
-        <!-- This is where our treaty text will be injected by JavaScript -->
+        <!-- Document Text Container -->
         <div id="text-container" class="text-box"></div>
 
+        <!-- Segmentation Controls -->
         <div class="controls">
-            <button id="export-btn">Export Cut Indices</button>
+            <button id="export-btn">Grade Cuts</button>
+            <button id="review-btn" style="background-color: #059669;">Review & Annotate</button>
             <button id="clear-btn" style="background-color: #ef4444;">Clear All Cuts</button>
         </div>
 
         <div id="output-console" class="console">
             Awaiting cuts...
         </div>
+
+        <!-- Annotation Screen (Hidden by default) -->
+        <div id="annotation-container" style="display: none; margin-top: 20px;">
+            <h2>Review & Annotate Segments</h2>
+            <div id="segments-list"></div>
+
+            <div style="margin-top: 20px;">
+                <label for="problems-dropdown"><strong>Problems Encountered with Text:</strong></label>
+                <select id="problems-dropdown" style="width: 100%; padding: 8px; margin-top: 5px;"></select>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button id="back-btn" style="background-color: #6b7280;">Back to Editing</button>
+                <button id="submit-btn" style="background-color: #16a34a;">Submit Final Annotations</button>
+            </div>
+        </div>
     </div>
     
     <script src="app.js"></script>
 </body>
-</html> 
+</html>

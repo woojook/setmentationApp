@@ -1,6 +1,23 @@
+// ==========================================
+// CONFIGURATION & API KEYS
+// ==========================================
+
 const DROPBOX_CSV_URL = "https://www.dropbox.com/scl/fi/jjna8gtwx3n1wj5obev5e/segment_data_example.csv?rlkey=zd69ad0c5vti8y6dke7puel2b&st=5pndf91u&raw=1";
+const DROPBOX_ACCESS_TOKEN = "YOUR_DROPBOX_ACCESS_TOKEN_HERE";
+
+// Files stored in Dropbox
+const DROPBOX_CSV_SAVE_PATH = "/annotations.csv";
+const DROPBOX_REFERENCE_CUTS_PATH = "/reference_cuts.json";
+
+const CURRENT_USER = "woojo";
+const DOCUMENT_TITLE = "segment_data_example";
+
+// ==========================================
+// CONSTANTS & ANNOTATION TYPES
+// ==========================================
 
 const annotationTypes = [
+    "Select a category...",
     "Motivation/Preamble",
     "Obligation (to Other States)",
     "Exceptions / Rights",
@@ -41,6 +58,9 @@ const problemsEncountered = [
     "Other"
 ];
 
+// ==========================================
+// DOM ELEMENTS
+// ==========================================
 
 const textContainer = document.getElementById('text-container');
 const exportBtn = document.getElementById('export-btn');
@@ -51,15 +71,94 @@ const reviewBtn = document.getElementById('review-btn');
 const backBtn = document.getElementById('back-btn');
 const submitBtn = document.getElementById('submit-btn');
 const problemsDropdown = document.getElementById('problems-dropdown');
+const clearBtn = document.getElementById('clear-btn');
 
-const clearBtn = document.getElementById('clear-btn')
+// ==========================================
+// APPLICATION STATE
+// ==========================================
 
 let wordsArray = [];
 let cuts = new Set();
+let referenceCuts = null; // Will store Coder 1's baseline cuts if available
+
 const saved = localStorage.getItem('localCuts');
 if (saved) {
     cuts = new Set(JSON.parse(saved));
 }
+
+// ==========================================
+// DROPBOX HELPER FUNCTIONS
+// ==========================================
+
+function escapeCSV(val) {
+    if (val === null || val === undefined) return '""';
+    let str = String(val).replace(/"/g, '""');
+    return `"${str}"`;
+}
+
+// Read JSON or Text files from Dropbox
+async function fetchDropboxFile(path) {
+    try {
+        const response = await fetch("https://content.dropboxapi.com/2/files/download", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${DROPBOX_ACCESS_TOKEN}`,
+                "Dropbox-API-Arg": JSON.stringify({ path: path })
+            }
+        });
+        if (response.ok) {
+            return await response.text();
+        }
+        return null;
+    } catch (err) {
+        console.warn(`File ${path} not found on Dropbox.`, err);
+        return null;
+    }
+}
+
+// Upload content to Dropbox
+async function saveDropboxFile(path, content, contentType = "application/octet-stream") {
+    const response = await fetch("https://content.dropboxapi.com/2/files/upload", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${DROPBOX_ACCESS_TOKEN}`,
+            "Dropbox-API-Arg": JSON.stringify({
+                path: path,
+                mode: "overwrite",
+                autorename: false,
+                mute: false
+            }),
+            "Content-Type": contentType
+        },
+        body: content
+    });
+
+    if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Dropbox upload failed: ${errText}`);
+    }
+    return await response.json();
+}
+
+// Load baseline cuts for this document from reference_cuts.json
+async function loadReferenceCuts() {
+    const jsonText = await fetchDropboxFile(DROPBOX_REFERENCE_CUTS_PATH);
+    if (jsonText) {
+        try {
+            const allRefData = JSON.parse(jsonText);
+            if (allRefData[DOCUMENT_TITLE]) {
+                referenceCuts = allRefData[DOCUMENT_TITLE].cuts;
+                console.log("Loaded baseline cuts for document:", referenceCuts);
+            }
+        } catch (e) {
+            console.error("Error parsing reference cuts JSON:", e);
+        }
+    }
+}
+
+// ==========================================
+// DATA FETCHING & RENDERING
+// ==========================================
 
 function parseCSVRow(csvText) {
     let result = [];
@@ -82,10 +181,14 @@ function parseCSVRow(csvText) {
 }
 
 async function loadDropboxData() {
-    outputConsole.innerText = "Loading agreement data from Dropbox...";
+    outputConsole.innerText = "Loading agreement data & reference cuts...";
     outputConsole.style.color = "#3b82f6";
 
     try {
+        // Fetch reference cuts in background
+        await loadReferenceCuts();
+
+        // Fetch document text
         const response = await fetch(DROPBOX_CSV_URL);
         if (!response.ok) throw new Error("Failed to load Dropbox file.");
         
@@ -97,19 +200,16 @@ async function loadDropboxData() {
             const documentText = rowData[1] || rowData[0] || "";
             
             wordsArray = documentText.split(/\s+/).filter(word => word.length > 0);
-            
-            const saved = localStorage.getItem('localCuts');
-            if (saved) {
-                cuts = new Set(JSON.parse(saved));
-            }
 
-            outputConsole.innerText = "Document loaded successfully!";
+            outputConsole.innerText = referenceCuts 
+                ? "Document loaded! Baseline cuts exist for comparison."
+                : "Document loaded! You are the first coder for this document.";
             outputConsole.style.color = "#22c55e";
             renderText();
         }
     } catch (error) {
         console.error(error);
-        outputConsole.innerText = "Error fetching Dropbox data. Check browser console.";
+        outputConsole.innerText = "Error fetching Dropbox data. Check console.";
         outputConsole.style.color = "#ef4444";
     }
 }
@@ -120,13 +220,9 @@ function toggleCut(index) {
     } else {
         cuts.add(index); 
     }
-    
     localStorage.setItem('localCuts', JSON.stringify(Array.from(cuts)));
     renderText(); 
 }
-
-
-const coderBCuts = [9, 21, 31]; 
 
 function renderText() {
     textContainer.innerHTML = ""; 
@@ -148,30 +244,58 @@ function renderText() {
     });
 }
 
-exportBtn.addEventListener('click', () => {
+// ==========================================
+// DYNAMIC GRADING & CLEAR CONTROLS
+// ==========================================
+
+exportBtn.addEventListener('click', async () => {
     const coderACuts = Array.from(cuts).sort((a, b) => a - b);
     
     if (coderACuts.length === 0) {
-        outputConsole.innerText = "Please make at least one cut before grading!";
+        outputConsole.innerText = "Please make at least one cut first!";
         outputConsole.style.color = "#ef4444"; 
         return;
     }
 
+    // IF FIRST TIME (No reference cuts exist in Dropbox for this document)
+    if (!referenceCuts) {
+        outputConsole.innerText = "Saving your cuts as the baseline...\nWaiting for the document to be coded by another person.";
+        outputConsole.style.color = "#eab308"; // yellow/warning tone
 
-    const sharedCuts = coderACuts.filter(cut => coderBCuts.includes(cut));
-    
+        try {
+            // Load existing store or create new
+            const jsonText = await fetchDropboxFile(DROPBOX_REFERENCE_CUTS_PATH);
+            let refStore = jsonText ? JSON.parse(jsonText) : {};
+            
+            refStore[DOCUMENT_TITLE] = {
+                coder: CURRENT_USER,
+                timestamp: new Date().toISOString(),
+                cuts: coderACuts
+            };
 
-    const allUniqueCuts = new Set([...coderACuts, ...coderBCuts]);
-    
+            await saveDropboxFile(DROPBOX_REFERENCE_CUTS_PATH, JSON.stringify(refStore, null, 2), "application/json");
+            referenceCuts = coderACuts; // Cache locally
+            
+            alert("Baseline cuts saved! Waiting for the document to be coded by another person.");
+        } catch (err) {
+            console.error("Failed to save baseline cuts:", err);
+            outputConsole.innerText = "Error saving baseline cuts to Dropbox.";
+            outputConsole.style.color = "#ef4444";
+        }
+        return;
+    }
 
+    // IF SECOND TIME ONWARDS (Compare against Coder 1's cuts)
+    const sharedCuts = coderACuts.filter(cut => referenceCuts.includes(cut));
+    const allUniqueCuts = new Set([...coderACuts, ...referenceCuts]);
     const agreementScore = (sharedCuts.length / allUniqueCuts.size) * 100;
 
     if (agreementScore >= 80) {
         outputConsole.style.color = "#22c55e"; 
-        outputConsole.innerText = `PASS: ${agreementScore.toFixed(1)}% Agreement!\nYour Cuts: [${coderACuts}]\nCoder B Cuts: [${coderBCuts}]`;
+        outputConsole.innerText = `PASS: ${agreementScore.toFixed(1)}% Agreement!\nYour Cuts: [${coderACuts}]\nCoder 1 Baseline Cuts: [${referenceCuts}]`;
     } else {
         outputConsole.style.color = "#ef4444"; 
-        outputConsole.innerText = `FAIL: ${agreementScore.toFixed(1)}% Agreement. Potential segmentation error.\nYour Cuts: [${coderACuts}]\nCoder B Cuts: [${coderBCuts}]`;
+        outputConsole.innerText = `FAIL: ${agreementScore.toFixed(1)}% Agreement. Potential segmentation error.\nYour Cuts: [${coderACuts}]\nCoder 1 Baseline Cuts: [${referenceCuts}]`;
     }
 });
 
@@ -187,22 +311,16 @@ if (clearBtn) {
     });
 }
 
-document.getElementById('clear-btn').addEventListener('click', () => {
-    if (confirm("Are you sure you want to delete all cuts?")) {
-        cuts.clear();
-        localStorage.removeItem('localCuts');
-        renderText();
-        outputConsole.innerText = "All cuts cleared.";
-        outputConsole.style.color = "#38bdf8";
-    }
-});
-
 problemsEncountered.forEach(problem => {
     const option = document.createElement('option');
     option.value = problem;
     option.innerText = problem;
     problemsDropdown.appendChild(option);
 });
+
+// ==========================================
+// ANNOTATION VIEW & SUBMISSION
+// ==========================================
 
 reviewBtn.addEventListener('click', () => {
     textContainer.style.display = "none";
@@ -265,13 +383,13 @@ backBtn.addEventListener('click', () => {
     if (clearBtn) clearBtn.style.display = "inline-block";
 });
 
-submitBtn.addEventListener('click', () => {
+submitBtn.addEventListener('click', async () => {
     const dropdowns = document.querySelectorAll('.segment-annotation');
     let chosenCategories = [];
     let isMissingAnnotation = false;
 
     dropdowns.forEach((dropdown) => {
-        if (dropdown.value === "Select a category..." || dropdown.value === annotationTypes[0]) {
+        if (dropdown.value === "Select a category...") {
             isMissingAnnotation = true;
         }
         chosenCategories.push(dropdown.value);
@@ -282,15 +400,73 @@ submitBtn.addEventListener('click', () => {
         return;
     }
 
-    const finalProblem = problemsDropdown.value;
-    
-    console.log("FINAL SUBMISSION PAYLOAD:", {
-        cutsArray: Array.from(cuts).sort((a, b) => a - b),
-        annotations: chosenCategories,
-        problemFlag: finalProblem
-    });
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Saving to Dropbox...";
 
-    alert("Check browser console (F12) to see your submitted payload!");
+    try {
+        let segmentTexts = [];
+        let currentSegment = [];
+        wordsArray.forEach((word, index) => {
+            currentSegment.push(word);
+            if (cuts.has(index) || index === wordsArray.length - 1) {
+                segmentTexts.push(currentSegment.join(" "));
+                currentSegment = [];
+            }
+        });
+
+        const now = new Date();
+        const timestamp = now.toISOString();
+        const currentDate = now.toISOString().split('T')[0];
+        const finalProblem = problemsDropdown.value;
+        const codingString = `cut_${Array.from(cuts).sort((a, b) => a - b).join('_')}`;
+
+        const headers = ["timestamp", "segid", "user", "coding", "segment_id", "segment", "annotation_type", "annotation_other", "title", "date"];
+        
+        let existingCSV = await fetchDropboxFile(DROPBOX_CSV_SAVE_PATH) || "";
+        let csvRows = [];
+
+        if (!existingCSV.trim()) {
+            csvRows.push(headers.join("\t"));
+        } else {
+            csvRows.push(existingCSV.trim());
+        }
+
+        segmentTexts.forEach((segmentText, i) => {
+            const annotationType = chosenCategories[i];
+            const segId = `SEG-${i + 1}`;
+            
+            const rowValues = [
+                timestamp,
+                segId,
+                CURRENT_USER,
+                codingString,
+                i + 1,
+                segmentText,
+                annotationType,
+                finalProblem,
+                DOCUMENT_TITLE,
+                currentDate
+            ];
+
+            csvRows.push(rowValues.map(escapeCSV).join("\t"));
+        });
+
+        const fullCSVContent = csvRows.join("\n");
+        await saveDropboxFile(DROPBOX_CSV_SAVE_PATH, fullCSVContent);
+
+        outputConsole.innerText = "Successfully saved annotations to Dropbox!";
+        outputConsole.style.color = "#22c55e";
+        alert("Annotations saved to Dropbox successfully!");
+
+    } catch (error) {
+        console.error("Error saving annotations:", error);
+        outputConsole.innerText = "Failed to save annotations to Dropbox.";
+        outputConsole.style.color = "#ef4444";
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Final Annotations";
+    }
 });
 
+// Initialize
 loadDropboxData();
