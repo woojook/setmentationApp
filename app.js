@@ -2,9 +2,9 @@
 // CONFIGURATION & DROPBOX API CREDENTIALS
 // ==========================================
 
-const DROPBOX_CLIENT_ID = "YOUR_DROPBOX_APP_KEY";
-const DROPBOX_REFRESH_TOKEN = "YOUR_DROPBOX_REFRESH_TOKEN";
-const DROPBOX_CLIENT_SECRET = "YOUR_DROPBOX_APP_SECRET"; // Optional if Public App
+const DROPBOX_CLIENT_ID = "emh6s5d1fo5g22e";
+const DROPBOX_REFRESH_TOKEN = "sl.u.AGrtroZP_j-seN7afZNGiAkvSq4uRimXJbQsT1MZ5O-iPLw4NmFPJOByKbR_hnh3zzD030lrLgFE_JuF6Rm2SKAoNba26X7-m0WvaC-0c79844pU7PYB4F7iVdIV_swmgRWupfWFtxrTx8CDvjilKNHglz5A86zstXn-L8zYU6DcGyKrAD4501TXfGAe-_98oVPJilzPbwo0QImB9zsQ63p0HpvoC0aQkDORY4-NU_0iK3UYR5XW5o2Ga0LYX9KEkJgZw3idFYnDcR3d35GBB3o9dx0RVnscSP3OjHABsJb88Q_W5XZjtHi4caHFJ9Q0Nyw4cd_Nw7uvAhObCPIIngXjOe9pP7Pe9vPDNgPJTnEA6REvhDgOvOqiSuejb4aRJ7YWMbq2GKUr6fzXqgMeI2yqnlrDoMb-cabrJRjzLGAcghtxo07JkZnjwKTi6Dq_n1mWyOHhMYITdwhJTBF5ZDSUx023BxFubKOBchtKf9lHBe4yxWHxg1P2oLb5_80HbTd0yOUj6RQrRPyRXPkJbZ9gEJtMBm45g8O4OLYq9kQbv5GIBPnlmU2Sgrc-9BzFnzBHXnOmlBBRIRb1iLb2CLtNsIPgXaSXvxERB43XCokdvPxVXEY4AzyUV1gY_m3u7xTWXLgsUtH1zj3XSpIjk6hdk03yYO5bTAeMLxB9BHLcgLQ0LZdbA_hxA_NqdVQ4v_CqeAt-lo1Z35gf8rl0m47gib-k9tD-v2SMmbU7R-1jjRASZ5Qk6rK8c95Ov4bM_TLapuhhhbDin4Vqx7hifPK95U7-vYO7f-UDTWYOQ3eFu39DS8X6o_ncDSVpMhGvBd5Sd06p2lNdmFxEePWO6XuwPbsSUnXtawiVm0aX72yJS3vN7PJfciLg1s-SWSAOJvEVf4tcWT3Ur30da7pkmmEAxalC_s3UUMp3mPuCZpm_IM_Y-g-CMOxhjnnGQBWefK6eC_htpXC0Yr01ZqwYAoK8xBPKC13G-KrIkENE9WY1Jm9v1uy1pXKI5W7G_2gP8TB672_9mV8ni6sQ33lfda5eeUtIKricuAEoXT3vWKMtEprzzNVeC-_RC7OoSKcThmo_CmKT1SfXAb4OkmA62HBf7Por4zWw_gO93pfrWzZhOXZWskDfaYD2gmeIIsOH2Xcp05ckyCu31wpPVlWLhmg9jJIl5gv358TCFUZQqol-QUlzaP98PxxBZH3J7nr7tvAd-tbK99YeTo7fPP4-l0AfI3DZYXhgXdX3HBNib1F3znsJaZouVEXS2wnfMUB7pRFCMgeDrvzyzHoitIR8DeZtB8d6D_kxXfJolKZPl7Z4jsjd1BNAimNKIAxIKGIVyAd7ad1sZWa_SlraCasltS6XcdoDs8b-KZJLmJM8BXbfH_riwWqKOE-D7y_CNuwbAnnxaEWkheP8Q7E6lWDAtSQJDBxQrFwNnwMinlYQJnX0aA";
+const DROPBOX_CLIENT_SECRET = "zvefsh2quh956bv"; // Optional if Public App
 
 // Fallback short-lived token (if refresh token not used)
 let DROPBOX_ACCESS_TOKEN = "YOUR_DROPBOX_ACCESS_TOKEN_HERE";
@@ -13,9 +13,10 @@ let DROPBOX_ACCESS_TOKEN = "YOUR_DROPBOX_ACCESS_TOKEN_HERE";
 const DOCUMENTS_MANIFEST = [
     {
         title: "guadalupe_example",
-        url: "https://www.dropbox.com/scl/fi/syvetvr94xw6mfkg8i353/segmentation-Sheet1.csv?rlkey=vfefakigx8ajt7ccyuyoa5nln&st=g62eejl4&raw=1"
+        url: "https://www.dropbox.com/scl/fi/syvetvr94xw6mfkg8i353/segmentation-Sheet1.csv?rlkey=vfefakigx8ajt7ccyuyoa5nln&dl=1"
     // Add additional treaty documents here:
-    // { title: "treaty_bilateral_2024", url: "https://www.dropbox.com/..." }
+    // { title: "treaty_bilateral_2024", url: "https://www.dropbox.com/..." 
+    }
 ];
 
 // Files stored on Dropbox
