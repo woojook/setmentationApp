@@ -12,9 +12,8 @@ let DROPBOX_ACCESS_TOKEN = "YOUR_DROPBOX_ACCESS_TOKEN_HERE";
 // Multi-Document Manifest
 const DOCUMENTS_MANIFEST = [
     {
-        title: "segment_data_example",
-        url: "https://www.dropbox.com/scl/fi/jjna8gtwx3n1wj5obev5e/segment_data_example.csv?rlkey=zd69ad0c5vti8y6dke7puel2b&st=5pndf91u&raw=1"
-    }
+        title: "guadalupe_example",
+        url: "https://www.dropbox.com/scl/fi/syvetvr94xw6mfkg8i353/segmentation-Sheet1.csv?rlkey=vfefakigx8ajt7ccyuyoa5nln&st=g62eejl4&raw=1"
     // Add additional treaty documents here:
     // { title: "treaty_bilateral_2024", url: "https://www.dropbox.com/..." }
 ];
