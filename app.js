@@ -12,6 +12,10 @@ let DROPBOX_ACCESS_TOKEN = "YOUR_DROPBOX_ACCESS_TOKEN_HERE";
 // Multi-Document Manifest
 const DOCUMENTS_MANIFEST = [
     {
+        title: "example",
+        url: "./documents/example.csv"
+    }
+    {
         title: "guadalupe_example",
         url: "https://www.dropbox.com/scl/fi/syvetvr94xw6mfkg8i353/segmentation-Sheet1.csv?rlkey=vfefakigx8ajt7ccyuyoa5nln&dl=1"
     // Add additional treaty documents here:
